@@ -1,21 +1,19 @@
 package com.rachel.okhttp;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.rachel.okhttplib.DisPoseListener;
 import com.rachel.okhttplib.OkHttpCommonClient;
 import com.rachel.okhttplib.request.CommonRequest;
-import com.rachel.okhttplib.request.DownloadListener;
 import com.rachel.okhttplib.request.RequestParams;
 
-import java.io.File;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "zsr";
@@ -23,6 +21,10 @@ public class MainActivity extends AppCompatActivity {
     private String gsonurl = "http://upgrade.toptech-developer.com/file/TvHouseManager/tvhousemanager.json";
     private String fileurl = "http://upgrade.toptech-developer.com/file/TvHouseManager/TvHouseManager.apk";
     private ImageView img ;
+    private GetApi mWeather;
+
+    private static final String BASEURL = "http://192.168.138.1:8080/http_server/";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,24 +32,59 @@ public class MainActivity extends AppCompatActivity {
 
         img = (ImageView) findViewById(R.id.img);
 
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.seniverse.com/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        mWeather = retrofit.create(GetApi.class);
     }
 
     public void get(View view){
+
+
         OkHttpCommonClient client = OkHttpCommonClient.getInstance();
 
         //获取心知天气
         RequestParams params = new  RequestParams();
-        params.put("key","m9datavogh53ftie");
-        params.put("location","shenzhen");
-        params.put("language","zh-Hans");
-        params.put("unit","c");
+        params.put("username","rachel");
+        params.put("password","123456789");
 
-        client.getString(CommonRequest.createGetRequest("https://api.seniverse.com/v3/weather/now.json",
+
+        client.getString(CommonRequest.createGetRequest(BASEURL+"login",
                 params)
                 , new DisPoseListener() {
                     @Override
                     public void onSuccess(Object resposeObj) {
-                        Log.d(TAG, "onSuccess: "+resposeObj.toString());
+                        //Log.d(TAG, "onSuccess: "+resposeObj.toString());
+                        Toast.makeText(MainActivity.this, resposeObj.toString(), Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(Object errorObj) {
+                        Log.d(TAG, "onFailure: "+errorObj.toString());
+                    }
+                });
+    }
+
+    public void post(View view){
+
+
+        OkHttpCommonClient client = OkHttpCommonClient.getInstance();
+
+        //获取心知天气
+        RequestParams params = new  RequestParams();
+        params.put("username","zhengshaorui");
+        params.put("password","123456789");
+
+
+        client.getString(CommonRequest.createPostFileRequest(BASEURL+"getFile"
+                )
+                , new DisPoseListener() {
+                    @Override
+                    public void onSuccess(Object resposeObj) {
+                        //Log.d(TAG, "onSuccess: "+resposeObj.toString());
+                       // Toast.makeText(MainActivity.this, resposeObj.toString(), Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
@@ -58,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void bitmap(View view){
+   /* public void bitmap(View view){
         OkHttpCommonClient client = OkHttpCommonClient.getInstance();
 
         client.getBitmap(CommonRequest.createGetRequest(imgurl),
@@ -147,5 +184,5 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 });
-    }
+    }*/
 }
