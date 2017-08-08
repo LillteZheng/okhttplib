@@ -7,6 +7,7 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.rachel.okhttplib.builder.GetBuilder;
 import com.rachel.okhttplib.request.DownloadListener;
 
 import java.io.ByteArrayInputStream;
@@ -64,6 +65,16 @@ public class OkHttpCommonClient {
         public OkHttpCommonClient getSingleTon(){
             return client;
         }
+    }
+
+    public static OkHttpClient getOkhttpClient(){
+        return mOkHttpClient;
+    }
+
+
+
+    public static GetBuilder getBuilder(){
+        return new GetBuilder();
     }
 
     /**
