@@ -1,17 +1,16 @@
 package com.rachel.okhttplib;
 
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import com.google.gson.Gson;
 import com.rachel.okhttplib.builder.GetBuilder;
+import com.rachel.okhttplib.builder.PostBuilder;
+import com.rachel.okhttplib.builder.PostFileBuilder;
+import com.rachel.okhttplib.builder.PostStringBuilder;
 import com.rachel.okhttplib.request.DownloadListener;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -67,14 +66,26 @@ public class OkHttpCommonClient {
         }
     }
 
-    public static OkHttpClient getOkhttpClient(){
+    public  OkHttpClient getOkhttpClient(){
         return mOkHttpClient;
     }
 
 
 
-    public static GetBuilder getBuilder(){
+    public GetBuilder getBuilder(){
         return new GetBuilder();
+    }
+
+    public PostBuilder postBuilder(){
+        return new PostBuilder();
+    }
+
+    public PostStringBuilder postStringBuilder(){
+        return new PostStringBuilder();
+    }
+
+    public PostFileBuilder postFileBuilder(){
+        return new PostFileBuilder();
     }
 
     /**
@@ -110,135 +121,9 @@ public class OkHttpCommonClient {
         });
     }
 
-    /**
-     * 获取bitmap，直接返回，不做处理
-     * @param request
-     * @param listener
-     */
-    public static void getBitmap(Request request, final DisPoseListener listener){
-        Call call = mOkHttpClient.newCall(request);
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call,final IOException e) {
-                mDeliverHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.onFailure(e);
-                    }
-                });
-            }
 
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()){
-                    InputStream is = response.body().byteStream();
 
-                    final Bitmap bitmap = BitmapFactory.decodeStream(is);
-                    mDeliverHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            listener.onSuccess(bitmap);
-                        }
-                    });
-                }
 
-            }
-        });
-    }
-
-    /**
-     * 获取图片，并根据宽高压缩图片
-     * @param request
-     * @param width
-     * @param height
-     * @param listener
-     */
-    public static void getBitmap(Request request, final int width, final int height, final DisPoseListener listener){
-        Call call = mOkHttpClient.newCall(request);
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call,final IOException e) {
-                mDeliverHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.onFailure(e);
-                    }
-                });
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                ByteArrayOutputStream bos = null;
-                if (response.isSuccessful()){
-                    InputStream is = response.body().byteStream();
-                    bos = new ByteArrayOutputStream();
-                    byte[] bytes = new byte[512];
-                    int len = -1;
-                    while ( (len = is.read(bytes)) != -1 ){
-                        bos.write(bytes,0,len);
-                    }
-                    bos.flush();
-                    //把 bytearrayinputstream 转换成inputstream
-                    is = new ByteArrayInputStream(bos.toByteArray());
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inJustDecodeBounds = true;
-                    Bitmap bitmap = BitmapFactory.decodeStream(is,null,options);
-
-                    //计算比例
-                    options.inSampleSize = sampleSize(options,width,height);
-                    options.inJustDecodeBounds = false;
-                    is = new ByteArrayInputStream(bos.toByteArray());
-                    bitmap = BitmapFactory.decodeStream(is,null,options);
-
-                    final Bitmap finalBitmap = bitmap;
-                    mDeliverHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            listener.onSuccess(finalBitmap);
-                        }
-                    });
-
-                }
-
-            }
-        });
-    }
-
-    /**
-     * 获取json数据
-     * @param request
-     * @param target
-     * @param listener
-     * @param <T>
-     */
-    public static <T> void getJson(Request request,final Class<T> target, final DisPoseListener listener){
-        Call call = mOkHttpClient.newCall(request);
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call,final IOException e) {
-                mDeliverHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.onFailure(e);
-                    }
-                });
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                String rootjson = response.body().string();
-                Gson gson = new Gson();
-                final T bean = gson.fromJson(rootjson,target);
-                mDeliverHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.onSuccess(bean);
-                    }
-                });
-
-            }
-        });
-    }
 
     /**
      * 单线程下载

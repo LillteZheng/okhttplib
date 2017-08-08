@@ -10,6 +10,7 @@
  *.prefs
  gradle/
  *.apk
+ .idea/*
 bin/
 gen/
 build/

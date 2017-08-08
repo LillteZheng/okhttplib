@@ -11,14 +11,12 @@ import okhttp3.Response;
  * 字符串类
  */
 
-public abstract class JsonResponse<T> extends BaseCallback<T> {
+public abstract class JsonResponse<T> extends BaseCallback<T>  {
     private Class<T> mclazz;
+
 
     public JsonResponse(Class<T> mclazz) {
         this.mclazz = mclazz;
-    }
-
-    public JsonResponse() {
     }
 
     @Override

@@ -151,6 +151,6 @@
     <orderEntry type="library" exported="" name="support-vector-drawable-25.3.1" level="project" />
     <orderEntry type="library" exported="" name="support-compat-25.3.1" level="project" />
     <orderEntry type="library" exported="" name="animated-vector-drawable-25.3.1" level="project" />
-    <orderEntry type="module" module-name="okhttplib-okhttplib" exported="" />
+    <orderEntry type="module" module-name="okhttplib" exported="" />
   </component>
 </module>
