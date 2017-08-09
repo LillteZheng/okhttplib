@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.rachel.okhttplib.OkHttpCommonClient;
 import com.rachel.okhttplib.callback.BitmapResponse;
@@ -75,69 +76,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void post(View view){
-
-
-        OkHttpCommonClient client = OkHttpCommonClient.getInstance();
-
-        client.postBuilder()
-                .url(BASEURL+"login")
-                .putParams("username","zhengshaorui")
-                .putParams("password","123456789")
-                .builder()
-                .enqueue(new StringResponse() {
-                    @Override
-                    public void onSuccess(String response) {
-                        Log.d(TAG, "onSuccess: "+response);
-                    }
-
-                    @Override
-                    public void onFailure(Object errorObj) {
-                        Log.d(TAG, "onFailure: "+errorObj.toString());
-                    }
-                });
-    }
-    public void poststring(View view){
-        OkHttpCommonClient client = OkHttpCommonClient.getInstance();
-        client.postStringBuilder()
-                .url(BASEURL+"getString")
-                .addMedieType("text/plain;chaset-utf-8","{username:rachel,password:123}")
-                .builder()
-                .enqueue(new StringResponse() {
-                    @Override
-                    public void onSuccess(String response) {
-
-                    }
-
-                    @Override
-                    public void onFailure(Object errorObj) {
-
-                    }
-                });
-
-    }
-
-    public void postfile(View view){
-        OkHttpCommonClient client = OkHttpCommonClient.getInstance();
-        File file = new File(Environment.getExternalStorageDirectory(),"TvHouseManager.apk");
-
-        client.postFileBuilder()
-                .url(BASEURL+"getFile")
-                .addMedieType("application/vnd.android.package-archive",file)
-                .builder()
-                .enqueue(new StringResponse() {
-                    @Override
-                    public void onSuccess(String response) {
-
-                    }
-
-                    @Override
-                    public void onFailure(Object errorObj) {
-
-                    }
-                });
-
-    }
 
 
 
@@ -159,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
-
+    //json 下载，Root.class 是我的实体类，这里使用的是gson
     public void gson(View view){
         OkHttpCommonClient client = OkHttpCommonClient.getInstance();
 
@@ -206,10 +144,11 @@ public class MainActivity extends AppCompatActivity {
                 });
 
     }
-
+    //多线程下载
     public void filemult(View view){
         OkHttpCommonClient client = OkHttpCommonClient.getInstance();
         String path = Environment.getExternalStorageDirectory().getPath();
+
         client.getBuilder()
                 .url(fileurl)
                 .builder()
@@ -229,27 +168,102 @@ public class MainActivity extends AppCompatActivity {
                         Log.d(TAG, "onFailure: "+errorObj.toString());
                     }
                 });
-       /* client.getFileMultThead(CommonRequest.createGetRequest(fileurl),
-                fileurl, 3, path, new DownloadListener() {
+    }
+
+
+    public void post(View view){
+
+
+        OkHttpCommonClient client = OkHttpCommonClient.getInstance();
+
+        client.postBuilder()
+                .url(BASEURL+"login")
+                .putParams("username","zhengshaorui")
+                .putParams("password","123456789")
+                .builder()
+                .enqueue(new StringResponse() {
                     @Override
-                    public void onProgress(int progress) {
-                        Log.d(TAG, "onProgress: "+progress);
+                    public void onSuccess(String response) {
+                        Log.d(TAG, "onSuccess: "+response);
                     }
 
                     @Override
-                    public void onSuccess(Object resposeObj) {
-                        String path = (String) resposeObj;
-                        File file = new File(path);
-                        if (file.exists()){
-                            Bitmap bitmap = BitmapFactory.decodeFile(path);
-                            img.setImageBitmap(bitmap);
-                        }
+                    public void onFailure(Object errorObj) {
+                        Log.d(TAG, "onFailure: "+errorObj.toString());
+                    }
+                });
+    }
+    public void poststring(View view){
+        OkHttpCommonClient client = OkHttpCommonClient.getInstance();
+        client.postStringBuilder()
+                .url(BASEURL+"getString")
+                .addMedieType("text/plain;chaset-utf-8","{username:rachel,password:123}")
+                .builder()
+                .enqueue(new StringResponse() {
+                    @Override
+                    public void onSuccess(String response) {
+
                     }
 
                     @Override
                     public void onFailure(Object errorObj) {
 
                     }
-                });*/
+                });
+
+    }
+
+    public void postfile(View view){
+        OkHttpCommonClient client = OkHttpCommonClient.getInstance();
+        File file = new File(Environment.getExternalStorageDirectory(),"TvHouseManager.apk");
+        if (file.exists()){
+            Toast.makeText(this, "TvHouseManager.apk" + "文件不存在", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        client.postFileBuilder()
+                .url(BASEURL+"getFile")
+                .addMedieType("application/vnd.android.package-archive",file)
+                .builder()
+                .enqueue(new StringResponse() {
+                    @Override
+                    public void onSuccess(String response) {
+
+                    }
+
+                    @Override
+                    public void onFailure(Object errorObj) {
+
+                    }
+                });
+
+    }
+
+
+    public void postupload(View view){
+        OkHttpCommonClient client = OkHttpCommonClient.getInstance();
+        File file = new File(Environment.getExternalStorageDirectory(),"tvlog.jpg");
+        if (file.exists()){
+            Toast.makeText(this, "tvlog.jpg" + "文件不存在", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        client.postUploadFile()
+                .url(BASEURL+"upLoad")
+                .addFile("mFile","mPhone.jpg",file)
+                .addPart("username","zhengshaorui")
+                .addPart("password","10086")
+                .builder()
+                .enqueue(new StringResponse() {
+                    @Override
+                    public void onSuccess(String response) {
+
+                    }
+
+                    @Override
+                    public void onFailure(Object errorObj) {
+
+                    }
+                });
+
+
     }
 }

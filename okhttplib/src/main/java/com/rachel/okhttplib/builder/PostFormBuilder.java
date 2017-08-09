@@ -21,49 +21,50 @@ import okhttp3.RequestBody;
  * 提交表单，比如说头像，名字，等等一起上传
  */
 
-public class PostFromBuilder extends OkhttpRequestBuilder<PostFromBuilder> {
+public class PostFormBuilder extends OkhttpRequestBuilder<PostFormBuilder> {
     private static final String TAG = "zsr";
     private static final String MEDIATYPE_STRING = "application/octet-stream";
     private Call mCall;
     private String type;
     private File file;
     private String name; //表达域的key
-    private String formname; //表达域的key
+    private String formname; //w文件传过去命名的名字
     private ConcurrentHashMap<String,String> multiPart;
-    public PostFromBuilder(){
+    public PostFormBuilder(){
 
     }
 
-
-
-    public PostFromBuilder addMedieType(String type, File file) {
-        this.type = type;
-        this.file = file;
-        if (this.file == null){
-            try {
-                throw  new Exception("file can not be null");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        if (this.type == null){
-            this.type = MEDIATYPE_STRING;
-        }
+    public PostFormBuilder addFile(String name, String formname, File file){
+        this.name = name;
+        this.formname = formname;
         return this;
     }
 
-    public PostFromBuilder addMultPart(ConcurrentHashMap<String,String> multiPart){
+
+
+    public PostFormBuilder addMultPart(ConcurrentHashMap<String,String> multiPart){
         this.multiPart = multiPart;
+
         return this;
     }
 
-    public PostFromBuilder(String url, String tag, String type, File file, ConcurrentHashMap<String, String> params,
+    public PostFormBuilder addPart(String key,String value){
+        if (this.multiPart == null){
+            this.multiPart = new ConcurrentHashMap<String,String>();
+        }
+        this.multiPart.put(key,value);
+        return this;
+    }
+
+    public PostFormBuilder(String url, String tag, String name, String formname, File file,
+                           ConcurrentHashMap<String, String> params,
                            ConcurrentHashMap<String, String> headers) {
         this.url = url;
         this.tag = tag;
         this.params = params;
         this.headers = headers;
-        this.type = type;
+        this.name = name;
+        this.formname = formname;
         this.file = file;
 
 
@@ -74,7 +75,7 @@ public class PostFromBuilder extends OkhttpRequestBuilder<PostFromBuilder> {
                 multBuilder.addFormDataPart(entry.getKey(),entry.getValue());
             }
         }
-        multBuilder.addFormDataPart(this.name,formname,FormBody.create(MediaType.parse(this.type),file));
+        multBuilder.addFormDataPart(this.name,formname,FormBody.create(MediaType.parse(MEDIATYPE_STRING),file));
 
         RequestBody formBody = multBuilder.build();
 
@@ -103,7 +104,7 @@ public class PostFromBuilder extends OkhttpRequestBuilder<PostFromBuilder> {
      * @param listener
      * @return
      */
-    public PostFromBuilder enqueue(final BaseCallback listener){
+    public PostFormBuilder enqueue(final BaseCallback listener){
         if (mCall != null){
             HandleCallUtils.enqueueCallBack(mCall,listener);
         }
@@ -115,7 +116,7 @@ public class PostFromBuilder extends OkhttpRequestBuilder<PostFromBuilder> {
      * @param listener
      * @return
      */
-    public PostFromBuilder execute(BaseCallback listener){
+    public PostFormBuilder execute(BaseCallback listener){
         if (mCall != null){
             HandleCallUtils.executeCallBack(mCall,listener);
         }
@@ -123,9 +124,9 @@ public class PostFromBuilder extends OkhttpRequestBuilder<PostFromBuilder> {
     }
 
     @Override
-    public PostFromBuilder builder() {
+    public PostFormBuilder builder() {
 
-        return new PostFromBuilder(url,tag,this.type,this.file,params,headers);
+        return new PostFormBuilder(url,tag,name,formname,file,params,headers);
     }
 
 

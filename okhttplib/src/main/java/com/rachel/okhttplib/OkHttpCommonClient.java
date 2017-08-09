@@ -8,6 +8,7 @@ import android.util.Log;
 import com.rachel.okhttplib.builder.GetBuilder;
 import com.rachel.okhttplib.builder.PostBuilder;
 import com.rachel.okhttplib.builder.PostFileBuilder;
+import com.rachel.okhttplib.builder.PostFormBuilder;
 import com.rachel.okhttplib.builder.PostStringBuilder;
 import com.rachel.okhttplib.request.DownloadListener;
 
@@ -86,6 +87,9 @@ public class OkHttpCommonClient {
 
     public PostFileBuilder postFileBuilder(){
         return new PostFileBuilder();
+    }
+    public PostFormBuilder postUploadFile(){
+        return new PostFormBuilder();
     }
 
     /**

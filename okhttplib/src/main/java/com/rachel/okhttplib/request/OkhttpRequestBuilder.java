@@ -42,5 +42,15 @@ public abstract class OkhttpRequestBuilder<T extends OkhttpRequestBuilder> {
         return (T)this;
     }
 
+    public T params(ConcurrentHashMap<String,String> params){
+        this.params = params;
+        return (T)this;
+    }
+
+    public T headers(ConcurrentHashMap<String,String> headers){
+        this.headers = headers;
+        return (T) this;
+    }
+
 
 }
