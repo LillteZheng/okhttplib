@@ -3,7 +3,9 @@ package com.rachel.okhttplib.builder;
 import com.rachel.okhttplib.HandleCallUtils;
 import com.rachel.okhttplib.OkHttpCommonClient;
 import com.rachel.okhttplib.callback.BaseCallback;
+import com.rachel.okhttplib.request.CountRequestBody;
 import com.rachel.okhttplib.request.OkhttpRequestBuilder;
+import com.rachel.okhttplib.request.UploadListener;
 
 import java.io.File;
 import java.util.Map;
@@ -30,6 +32,7 @@ public class PostFormBuilder extends OkhttpRequestBuilder<PostFormBuilder> {
     private String name; //表达域的key
     private String formname; //w文件传过去命名的名字
     private ConcurrentHashMap<String,String> multiPart;
+    private BaseCallback mUploadListener;
     public PostFormBuilder(){
 
     }
@@ -37,6 +40,7 @@ public class PostFormBuilder extends OkhttpRequestBuilder<PostFormBuilder> {
     public PostFormBuilder addFile(String name, String formname, File file){
         this.name = name;
         this.formname = formname;
+        this.file = file;
         return this;
     }
 
@@ -58,7 +62,8 @@ public class PostFormBuilder extends OkhttpRequestBuilder<PostFormBuilder> {
 
     public PostFormBuilder(String url, String tag, String name, String formname, File file,
                            ConcurrentHashMap<String, String> params,
-                           ConcurrentHashMap<String, String> headers) {
+                           ConcurrentHashMap<String, String> headers,
+                           ConcurrentHashMap<String, String> multiPart) {
         this.url = url;
         this.tag = tag;
         this.params = params;
@@ -66,6 +71,7 @@ public class PostFormBuilder extends OkhttpRequestBuilder<PostFormBuilder> {
         this.name = name;
         this.formname = formname;
         this.file = file;
+        this.multiPart = multiPart;
 
 
         MultipartBody.Builder multBuilder = new MultipartBody.Builder();
@@ -75,14 +81,21 @@ public class PostFormBuilder extends OkhttpRequestBuilder<PostFormBuilder> {
                 multBuilder.addFormDataPart(entry.getKey(),entry.getValue());
             }
         }
-        multBuilder.addFormDataPart(this.name,formname,FormBody.create(MediaType.parse(MEDIATYPE_STRING),file));
+        multBuilder.addFormDataPart(this.name,this.formname,FormBody.create(MediaType.parse(MEDIATYPE_STRING),file));
 
         RequestBody formBody = multBuilder.build();
+
+        CountRequestBody countRequestBody = new CountRequestBody(formBody, new UploadListener() {
+            @Override
+            public void onUploadProgress(int progress) {
+                mUploadListener.onUploadProgress(progress);
+            }
+        });
 
         Request.Builder builder = new Request.Builder();
 
 
-        builder.url(url).tag(tag).post(formBody);
+        builder.url(url).tag(tag).post(countRequestBody);
 
 
 
@@ -106,6 +119,7 @@ public class PostFormBuilder extends OkhttpRequestBuilder<PostFormBuilder> {
      */
     public PostFormBuilder enqueue(final BaseCallback listener){
         if (mCall != null){
+            mUploadListener = listener;
             HandleCallUtils.enqueueCallBack(mCall,listener);
         }
         return this;
@@ -118,6 +132,7 @@ public class PostFormBuilder extends OkhttpRequestBuilder<PostFormBuilder> {
      */
     public PostFormBuilder execute(BaseCallback listener){
         if (mCall != null){
+            mUploadListener = listener;
             HandleCallUtils.executeCallBack(mCall,listener);
         }
         return this;
@@ -126,7 +141,7 @@ public class PostFormBuilder extends OkhttpRequestBuilder<PostFormBuilder> {
     @Override
     public PostFormBuilder builder() {
 
-        return new PostFormBuilder(url,tag,name,formname,file,params,headers);
+        return new PostFormBuilder(url,tag,name,formname,file,params,headers,multiPart);
     }
 
 
