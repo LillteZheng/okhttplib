@@ -56,22 +56,22 @@ public class MainActivity extends AppCompatActivity {
         mClient = OkHttpCommonClient.getInstance();
         mClient.setOkhttpClient(okHttpClient);
 
-        Log.d(TAG, "onCreate: ");
+
     }
 
     public void doget(View view){
 
 
 
-       
+        //使用get方法获取数据，
         mClient.getBuilder()
                 .url(Weather_baseurl)
                 .putParams("key","m9datavogh53ftie")
                 .putParams("location","shenzhen")
                 .builder()
-                .enqueue(new StringResponse() {
+                .enqueue(new StringResponse() { //使用不同的 response
                     @Override
-                    public void onSuccess(String response) {
+                    public void onSuccess(String response) { //返回你需要的值，比如这里的String，或者json等等
                         Log.d(TAG, "builder: "+response);
                     }
 
